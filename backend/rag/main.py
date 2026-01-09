@@ -1,37 +1,29 @@
-import streamlit as st #type: ignore
 import os
-from dotenv import load_dotenv #type: ignore
-from PyPDF2 import PdfReader #type: ignore
 from langchain_text_splitters import CharacterTextSplitter #type: ignore
 from langchain_google_genai import GoogleGenerativeAIEmbeddings #type: ignore
 from langchain_qdrant import QdrantVectorStore #type: ignore
 from langchain_core.documents import Document #type: ignore
 from openai import OpenAI #type: ignore
+from typing import List, Dict, Any
 
 QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
 QDRANT_COLLECTION = os.getenv("QDRANT_COLLECTION", "MultiPDFChat")
 
-def get_pdf_documents(pdf_docs):
-    # Extract text and create Document objects with metadata
-    documents = []
-    for pdf in pdf_docs:
-        reader = PdfReader(pdf)  # page wise
-        source_name = getattr(pdf, "name", "uploaded.pdf")
-        for page_index, page in enumerate(reader.pages, start=1): # enumerate?
-            page_text = page.extract_text() or ""
-            if not page_text.strip():
-                continue
-            documents.append(
-                Document(
-                    page_content=page_text,
-                    metadata={
-                        "source": source_name,
-                        "page_label": page_index,
-                    },
-                )
-            )
-    return documents
+# converts list of raw page dicts to list of LangChain Documents
+def build_documents(pages: List[Dict[str, Any]]) -> List[Document]:
+    docs: List[Document] = []
+    for pg in pages:
+        content = pg.get("page_content", "") # p["page_content"]
+        if not isinstance(content, str) or not content.strip():
+            continue
+        metadata = {
+            "source": pg["source"],
+            "page_label": pg["page_label"],
+        }
+        docs.append(Document(page_content=content, metadata=metadata))
+    return docs
 
+# document is tuple of (page_content, metadata) where metadata is a dict
 def get_text_chunks(documents):
     splitter = CharacterTextSplitter(
         separator="\n",

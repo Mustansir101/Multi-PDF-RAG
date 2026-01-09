@@ -3,19 +3,15 @@ from fastapi.middleware.cors import CORSMiddleware  #type: ignore
 from pydantic import BaseModel  #type: ignore
 import uvicorn #type: ignore
 from typing import Any, Dict, List
-from uuid import uuid4
-
+from uuid import uuid4 # to generate unique strings
 from dotenv import load_dotenv  #type: ignore
 from PyPDF2 import PdfReader  #type: ignore
-from langchain_core.documents import Document  #type: ignore
 
-from main import get_text_chunks, create_vector_store, answer_question
+from rag.main import build_documents, get_text_chunks, create_vector_store, answer_question
 
 load_dotenv()
-
 app = FastAPI()
 
-# Allow the browser-based Next.js frontend to call this API.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -24,34 +20,36 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Keep vector stores server-side; return a session id to the client.
+# maps unique session_id to vector store id
 VECTOR_STORES: Dict[str, Any] = {}
 
-
-def extract_documents_from_uploads(files: List[UploadFile]) -> List[Document]:
-    documents: List[Document] = []
-
+# Extract raw page data
+def extract_pages_from_uploads ( files: List[UploadFile] ) -> List[Dict[str, Any]]:
+    pages = []
     for upload in files:
         try:
+            # Reset pointer to start of file
             upload.file.seek(0)
-            reader = PdfReader(upload.file)
+            reader = PdfReader(upload.file) #PyPDF2
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Invalid PDF '{upload.filename}': {e}")
 
+        # loop through each page, start just changes idx 0 to 1 (still reads all pg)
+        # enumerate instead of range(len(pages))
         for page_index, page in enumerate(reader.pages, start=1):
             page_text = page.extract_text() or ""
             if not page_text.strip():
                 continue
-            documents.append(
-                Document(
-                    page_content=page_text,
-                    metadata={"source": upload.filename, "page_label": page_index},
-                )
+            pages.append(
+                {
+                    "page_content": page_text,
+                    "source": upload.filename,
+                    "page_label": page_index,
+                }
             )
+    return pages
 
-    return documents
-
-
+# Pydantic model
 class AskQuestionRequest(BaseModel):
     session_id: str
     user_query: str
@@ -64,17 +62,18 @@ async def upload_pdfs(
         raise HTTPException(status_code=400, detail="No files uploaded.")
     
     try:
-        documents = extract_documents_from_uploads(files)
-        if not documents:
+        pages = extract_pages_from_uploads(files) # list of dicts (raw pages)
+        if not pages:
             raise HTTPException(
                 status_code=400,
                 detail="No extractable text found in the uploaded PDFs (scanned PDFs may need OCR).",
             )
-
+        # Build LangChain Documents in rag.main
+        documents = build_documents(pages)
         chunks = get_text_chunks(documents)
         vector_store = create_vector_store(chunks)
 
-        session_id = str(uuid4())
+        session_id = str(uuid4()) # generate unique session ID
         VECTOR_STORES[session_id] = vector_store
 
         return {
@@ -88,17 +87,16 @@ async def upload_pdfs(
 @app.post("/ask-question")
 async def ask_question(payload: AskQuestionRequest):
     try:
+        #! generate vector store ref from session_id
         vector_store = VECTOR_STORES.get(payload.session_id)
+
         if vector_store is None:
             raise HTTPException(status_code=404, detail="Unknown session_id. Process PDFs again.")
 
         answer = answer_question(vector_store, payload.user_query)
         return {"answer": answer}
-    except HTTPException:
-        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error answering question: {e}")
-
 
 if __name__ == "__main__":
     uvicorn.run(app, port=8000, host="0.0.0.0")
