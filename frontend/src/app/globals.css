@@ -1,0 +1,502 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+    Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  color: #0f172a;
+  background: #ffffff;
+}
+
+:root {
+  --bg: #ffffff;
+  --panel: #f7f7f8;
+  --panel-2: #f3f4f6;
+  --border: rgba(2, 6, 23, 0.1);
+  --text: #0f172a;
+  --muted: #6b7280;
+  --muted-2: #9ca3af;
+  --bubble: #ffffff;
+  --bubble-user: #f7f7f8;
+  --accent: #10a37f;
+  --danger: #dc2626;
+
+  /* Dark sidebar (ChatGPT-like) */
+  --sidebar-bg: #111827;
+  --sidebar-panel: rgba(255, 255, 255, 0.06);
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-text: #f9fafb;
+  --sidebar-muted: rgba(249, 250, 251, 0.72);
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.appRoot {
+  height: 100vh;
+}
+
+.appShell {
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+}
+
+.sidebar {
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
+  color: var(--sidebar-text);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sidebarHeader {
+  padding: 16px;
+  border-bottom: 1px solid var(--sidebar-border);
+}
+
+.brand {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.brandDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.2);
+}
+
+.brandTitle {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.brandSub {
+  color: var(--sidebar-muted);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.sidebarSection {
+  padding: 16px;
+  overflow: auto;
+  min-height: 0;
+}
+
+.sidebarSectionTitle {
+  font-size: 12px;
+  color: var(--sidebar-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+
+.sidebarSectionBody {
+  background: var(--sidebar-panel);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.sidebarMeta {
+  margin-top: 12px;
+  display: grid;
+  gap: 12px;
+}
+
+.sidebarMetaRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.sidebarMetaValue {
+  font-size: 12px;
+  color: var(--sidebar-text);
+  text-align: right;
+  word-break: break-word;
+}
+
+.sidebarFiles {
+  display: grid;
+  gap: 8px;
+}
+
+.sidebarFileList {
+  display: grid;
+  gap: 6px;
+}
+
+.sidebarFile {
+  font-size: 12px;
+  color: var(--sidebar-text);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 10px;
+  padding: 8px 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebarFooter {
+  padding: 14px 16px;
+  border-top: 1px solid var(--sidebar-border);
+}
+
+.sidebar .muted {
+  color: var(--sidebar-muted);
+}
+
+.sidebar .sidebarHint {
+  border: 1px solid var(--sidebar-border);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--sidebar-text);
+}
+
+/* Sidebar PDF uploader overrides */
+.sidebar .filePicker {
+  border: 1px dashed rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar .filePickerText {
+  color: var(--sidebar-muted);
+}
+
+.sidebar .chip {
+  color: var(--sidebar-text);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--sidebar-border);
+}
+
+.chatPane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.chatTopBar {
+  border-bottom: 1px solid var(--border);
+  background: rgba(247, 247, 248, 0.85);
+  backdrop-filter: blur(10px);
+  padding: 14px 18px;
+}
+
+.chatTitle {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.chatSubtitle {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.chatLayout {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chatScroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 18px;
+  padding-bottom: 120px;
+}
+
+.messageList {
+  display: grid;
+  gap: 12px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.messageRow {
+  display: flex;
+}
+
+.messageRow.assistant {
+  justify-content: flex-start;
+}
+
+.messageRow.user {
+  justify-content: flex-end;
+}
+
+.messageBubble {
+  width: min(720px, 100%);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 12px;
+  background: var(--bubble);
+}
+
+.messageRow.user .messageBubble {
+  background: var(--bubble-user);
+}
+
+.messageMeta {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.messageRole {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.messageTime {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.messageText {
+  white-space: pre-wrap;
+  line-height: 1.45;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.messageSources {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sourcesSection {
+  margin-top: 12px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+.sourcesTitle {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.sourcePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text);
+  border: 1px solid var(--border);
+  background: rgba(2, 6, 23, 0.03);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.sourceName {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sourcePage {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.composer {
+  border-top: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  padding: 14px 18px;
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+}
+
+.composerRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.composerInput {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  color: var(--text);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 14px;
+  outline: none;
+}
+
+.composerInput:focus {
+  border-color: rgba(16, 163, 127, 0.45);
+  box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.12);
+}
+
+.composerButton {
+  border: 1px solid rgba(16, 163, 127, 0.4);
+  background: rgba(16, 163, 127, 0.12);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.composerButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.composerHint {
+  max-width: 900px;
+  margin: 10px auto 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.emptyState {
+  max-width: 720px;
+  margin: 80px auto;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
+  background: #ffffff;
+}
+
+.emptyStateTitle {
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.emptyStateBody {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.errorBanner {
+  max-width: 900px;
+  margin: 0 auto 10px;
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  color: #991b1b;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
+/* Sidebar PDF uploader */
+.pdfBox {
+  display: grid;
+  gap: 10px;
+}
+
+.filePicker {
+  display: grid;
+  gap: 8px;
+  border: 1px dashed rgba(2, 6, 23, 0.18);
+  background: rgba(2, 6, 23, 0.03);
+  border-radius: 12px;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.filePicker input {
+  width: 100%;
+}
+
+.filePickerText {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.primaryButton {
+  width: 100%;
+  border: 1px solid rgba(16, 163, 127, 0.4);
+  background: rgba(16, 163, 127, 0.18);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.primaryButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.fileChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  display: inline-block;
+  max-width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: var(--text);
+  background: rgba(2, 6, 23, 0.03);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.errorText {
+  color: #991b1b;
+  font-size: 12px;
+}
+
+.sidebarHint {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(2, 6, 23, 0.03);
+  font-size: 12px;
+  color: var(--text);
+}
+
+@media (max-width: 900px) {
+  .appShell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    display: none;
+  }
+}

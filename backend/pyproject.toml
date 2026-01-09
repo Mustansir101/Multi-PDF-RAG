@@ -1,0 +1,19 @@
+[project]
+name = "multi-pdf-rag"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "faiss-cpu>=1.13.2",
+    "fastapi[standard]>=0.128.0",
+    "huggingface-hub>=1.2.3",
+    "langchain-google-genai>=4.1.2",
+    "langchain-qdrant>=1.1.0",
+    "langchain-text-splitters>=1.1.0",
+    "openai>=2.14.0",
+    "pypdf2>=3.0.1",
+    "python-dotenv>=1.2.1",
+    "streamlit>=1.52.2",
+    "uvicorn>=0.40.0",
+]
