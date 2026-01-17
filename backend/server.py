@@ -1,12 +1,13 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException #type: ignore
 from fastapi.middleware.cors import CORSMiddleware  #type: ignore
 from pydantic import BaseModel  #type: ignore
-import uvicorn #type: ignore
-from typing import Any, Dict, List
-from uuid import uuid4 # to generate unique strings
 from dotenv import load_dotenv  #type: ignore
 from PyPDF2 import PdfReader  #type: ignore
+import uvicorn #type: ignore
+from typing import Any, Dict, List
+from uuid import uuid4
 
+from client.client import queue
 from rag.main import build_documents, get_text_chunks, create_vector_store, answer_question
 
 load_dotenv()
@@ -89,11 +90,16 @@ async def ask_question(payload: AskQuestionRequest):
     try:
         #! generate vector store ref from session_id
         vector_store = VECTOR_STORES.get(payload.session_id)
-
         if vector_store is None:
             raise HTTPException(status_code=404, detail="Unknown session_id. Process PDFs again.")
+        
+        # answer = answer_question(vector_store, payload.user_query)
+        job = queue.enqueue(answer_question, vector_store, payload.user_query)
+        answer = job.return_value()
 
-        answer = answer_question(vector_store, payload.user_query)
+        while answer is None:
+            answer = job.return_value()
+        
         return {"answer": answer}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error answering question: {e}")
