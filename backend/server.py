@@ -6,9 +6,8 @@ from PyPDF2 import PdfReader  #type: ignore
 import uvicorn #type: ignore
 from typing import Any, Dict, List
 from uuid import uuid4
-
-from client.client import queue
 from rag.main import build_documents, get_text_chunks, create_vector_store, answer_question
+# from client.client import queue
 
 load_dotenv()
 app = FastAPI()
@@ -93,12 +92,11 @@ async def ask_question(payload: AskQuestionRequest):
         if vector_store is None:
             raise HTTPException(status_code=404, detail="Unknown session_id. Process PDFs again.")
         
-        # answer = answer_question(vector_store, payload.user_query)
-        job = queue.enqueue(answer_question, vector_store, payload.user_query)
-        answer = job.return_value()
-
-        while answer is None:
-            answer = job.return_value()
+        answer = answer_question(vector_store, payload.user_query)
+        # job = queue.enqueue(answer_question, vector_store, payload.user_query)
+        # answer = job.return_value()
+        # while answer is None:
+        #     answer = job.return_value()
         
         return {"answer": answer}
     except Exception as e:
