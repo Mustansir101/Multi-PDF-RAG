@@ -48,8 +48,6 @@ def extract_pages_from_uploads ( files: List[UploadFile] ) -> List[Dict[str, Any
                 }
             )
     return pages
-
-# Pydantic model
 class AskQuestionRequest(BaseModel):
     session_id: str
     user_query: str
@@ -66,7 +64,7 @@ async def upload_pdfs(
         if not pages:
             raise HTTPException(
                 status_code=400,
-                detail="No extractable text found in the uploaded PDFs (scanned PDFs may need OCR).",
+                detail="No extractable text found in the uploaded PDFs",
             )
         # Build LangChain Documents in rag.main
         documents = build_documents(pages)
@@ -87,7 +85,6 @@ async def upload_pdfs(
 @app.post("/ask-question")
 async def ask_question(payload: AskQuestionRequest):
     try:
-        #! generate vector store ref from session_id
         vector_store = VECTOR_STORES.get(payload.session_id)
         if vector_store is None:
             raise HTTPException(status_code=404, detail="Unknown session_id. Process PDFs again.")

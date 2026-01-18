@@ -9,8 +9,16 @@ body {
 
 body {
   margin: 0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
-    Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Helvetica,
+    Arial,
+    "Apple Color Emoji",
+    "Segoe UI Emoji";
   color: #0f172a;
   background: #ffffff;
 }
@@ -444,7 +452,7 @@ body {
   width: 100%;
   border: 1px solid rgba(16, 163, 127, 0.4);
   background: rgba(16, 163, 127, 0.18);
-  color: var(--text);
+  color: white;
   border-radius: 12px;
   padding: 10px 12px;
   font-weight: 800;

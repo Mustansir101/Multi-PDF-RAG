@@ -23,7 +23,6 @@ export default function HomePage() {
             <div className="brandDot" aria-hidden="true" />
             <div>
               <div className="brandTitle">Multi PDF RAG</div>
-              <div className="brandSub">Dummy API frontend</div>
             </div>
           </div>
         </div>

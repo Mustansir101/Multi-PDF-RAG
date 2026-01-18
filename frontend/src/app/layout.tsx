@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Multi PDF RAG",
-  description: "Chat with multiple PDFs (dummy API frontend)",
+  description: "Chat with multiple PDFs",
 };
 
 export default function RootLayout({
