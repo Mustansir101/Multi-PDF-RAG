@@ -3,8 +3,8 @@ from langchain_text_splitters import CharacterTextSplitter #type: ignore
 from langchain_google_genai import GoogleGenerativeAIEmbeddings #type: ignore
 from langchain_qdrant import QdrantVectorStore #type: ignore
 from langchain_core.documents import Document #type: ignore
-from openai import OpenAI #type: ignore
 from typing import List, Dict, Any
+import google.generativeai as genai
 
 QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
 QDRANT_COLLECTION = os.getenv("QDRANT_COLLECTION", "MultiPDFChat")
@@ -40,7 +40,7 @@ def get_embedding_model():
     if not google_api_key:
         raise ValueError("Missing GOOGLE_API_KEY")
     return GoogleGenerativeAIEmbeddings(
-        model="models/text-embedding-004",
+        model="gemini-embedding-001",
         google_api_key=google_api_key,
     )
 
@@ -67,34 +67,36 @@ def answer_question(vector_store, user_query):
         for res in search_res
     ])
 
-    SYSTEM_PROMPT = f"""You are a helpful AI assistant who answers user queries based only on the available context retrieved from the PDF files, along with page_contents and page_numbers.
-    
-    You should only answer based on the following context and navigate the user to the relevant page number for more details.
-    
-    If the answer is not found in the context, respond with: "I am sorry, I could not find any relevant information in the document provided."
-    
+    SYSTEM_PROMPT = f"""You are an AI assistant that generates questions based only on the provided context from PDF documents, including page_contents and page_numbers.
+
+    Your task is to create clear, relevant, and meaningful questions that can be answered using the given context.
+
+    Rules:
+    - Generate questions strictly from the context. Do not use outside knowledge.
+    - Questions should test understanding, not be trivial or copied directly.
+    - Include a mix of question types such as factual, conceptual, and analytical when possible.
+    - For each question, mention the page number it is derived from.
+    - Do NOT provide answers.
+
+    If the context is insufficient to generate questions, respond with:
+    "I am sorry, I could not generate questions from the provided document."
+
     Context:
     {context}
     """
 
+    # ✅ NEW: configure Gemini
     gemini_api_key = os.getenv("GEMINI_API_KEY")
     if not gemini_api_key:
-        raise ValueError(
-            "Missing GEMINI_API_KEY. Add it to your .env file (or Streamlit secrets)."
-        )
+        raise ValueError("Missing GEMINI_API_KEY")
 
-    client = OpenAI(
-        api_key=gemini_api_key,
-        base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
-    )
+    genai.configure(api_key=gemini_api_key)
 
-    response = client.chat.completions.create(
-        model="gemini-2.5-flash",
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": user_query},
-        ],
-    )
+    model = genai.GenerativeModel("gemini-2.5-flash")
 
-    return response.choices[0].message.content
+    # ✅ combine system + user into one prompt (Gemini style)
+    full_prompt = SYSTEM_PROMPT + "\n\nUser Query:\n" + user_query
 
+    response = model.generate_content(full_prompt)
+
+    return response.text
