@@ -28,14 +28,7 @@ Key implementation points:
 - Chunking on `Document` objects retains metadata through the pipeline for accurate citations.
 - The server holds vector stores per session (`session_id`) so the browser never uploads embeddings or vectors.
 
-## Repo Structure
-
-- Backend code: [backend/server.py](backend/server.py), [backend/main.py](backend/main.py), config: [backend/pyproject.toml](backend/pyproject.toml)
-- Frontend app: [frontend/src/app](frontend/src/app), components: [frontend/src/components/PdfProcessor.tsx](frontend/src/components/PdfProcessor.tsx), [frontend/src/components/Chat.tsx](frontend/src/components/Chat.tsx), config: [frontend/src/lib/config.ts](frontend/src/lib/config.ts)
-
 ## Backend API
-
-Base URL defaults to `http://localhost:8000`.
 
 - POST `/process-pdfs`
 
@@ -55,8 +48,6 @@ Base URL defaults to `http://localhost:8000`.
     - `answer`: string
     - `sources`?: `[{ source: string; page_label: number }]` (optional; UI displays if provided)
 
-Models and types: see [frontend/src/lib/types.ts](frontend/src/lib/types.ts).
-
 ## Environment Variables
 
 Place a `.env` file in `backend/` with:
@@ -69,54 +60,6 @@ Place a `.env` file in `backend/` with:
 Frontend environment (`frontend/.env.local`):
 
 - `NEXT_PUBLIC_API_BASE_URL`: default `http://localhost:8000`.
-
-## Setup
-
-### Prerequisites
-
-- Python 3.13+
-- Node.js 18+
-- Docker Desktop (to run Qdrant locally)
-
-### Start Qdrant (Docker)
-
-```powershell
-docker pull qdrant/qdrant:latest
-docker run -p 6333:6333 --name qdrant qdrant/qdrant:latest
-```
-
-### Backend (FastAPI)
-
-1. Create and activate a virtualenv (Windows PowerShell):
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
-
-2. Install dependencies from `pyproject` (no build backend specified, so install packages directly):
-
-```powershell
-pip install faiss-cpu fastapi[standard] huggingface-hub langchain-google-genai langchain-qdrant langchain-text-splitters openai pypdf2 python-dotenv streamlit uvicorn
-```
-
-3. Add a `.env` file in `backend/` with keys above.
-4. Run the API:
-
-```powershell
-cd backend
-python server.py
-# or
-uvicorn server:app --host 0.0.0.0 --port 8000
-```
-
-### Frontend (Next.js)
-
-```powershell
-cd frontend
-npm install
-npm run dev
-```
 
 ## Data Pipeline Details
 
