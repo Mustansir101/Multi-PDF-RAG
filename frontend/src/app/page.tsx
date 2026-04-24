@@ -22,7 +22,7 @@ export default function HomePage() {
           <div className="brand">
             <div className="brandDot" aria-hidden="true" />
             <div>
-              <div className="brandTitle">Multi PDF RAG</div>
+              <div className="brandTitle">AI Question Generator</div>
             </div>
           </div>
         </div>

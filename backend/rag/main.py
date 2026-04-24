@@ -1,10 +1,12 @@
 import os
-from langchain_text_splitters import CharacterTextSplitter #type: ignore
-from langchain_google_genai import GoogleGenerativeAIEmbeddings #type: ignore
-from langchain_qdrant import QdrantVectorStore #type: ignore
-from langchain_core.documents import Document #type: ignore
+from langchain_text_splitters import CharacterTextSplitter
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_qdrant import QdrantVectorStore
+from langchain_core.documents import Document
 from typing import List, Dict, Any
 import google.generativeai as genai
+from openai import OpenAI
+from google.genai import types
 
 QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
 QDRANT_COLLECTION = os.getenv("QDRANT_COLLECTION", "MultiPDFChat")
@@ -40,8 +42,9 @@ def get_embedding_model():
     if not google_api_key:
         raise ValueError("Missing GOOGLE_API_KEY")
     return GoogleGenerativeAIEmbeddings(
-        model="gemini-embedding-001",
-        google_api_key=google_api_key,
+        model = "gemini-embedding-001",
+        google_api_key = google_api_key,
+        config = types.EmbedContentConfig(output_dimensionality=2048)
     )
 
 def create_vector_store(chunks):
@@ -51,6 +54,7 @@ def create_vector_store(chunks):
         documents = chunks,
         embedding = embedding_model,
         url = QDRANT_URL,
+        batch_size = 10,
         collection_name = QDRANT_COLLECTION
     )
     return vector_store
@@ -85,18 +89,23 @@ def answer_question(vector_store, user_query):
     {context}
     """
 
-    # ✅ NEW: configure Gemini
     gemini_api_key = os.getenv("GEMINI_API_KEY")
     if not gemini_api_key:
-        raise ValueError("Missing GEMINI_API_KEY")
+        raise ValueError(
+            "Missing GEMINI_API_KEY. Add it to your .env file (or Streamlit secrets)."
+        )
 
-    genai.configure(api_key=gemini_api_key)
+    client = OpenAI(
+        api_key=gemini_api_key,
+        base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+    )
 
-    model = genai.GenerativeModel("gemini-2.5-flash")
+    response = client.chat.completions.create(
+        model="gemini-2.5-flash",
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": user_query},
+        ],
+    )
 
-    # ✅ combine system + user into one prompt (Gemini style)
-    full_prompt = SYSTEM_PROMPT + "\n\nUser Query:\n" + user_query
-
-    response = model.generate_content(full_prompt)
-
-    return response.text
+    return response.choices[0].message.content

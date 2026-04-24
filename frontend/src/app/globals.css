@@ -37,7 +37,7 @@ body {
   --danger: #dc2626;
 
   /* Dark sidebar (ChatGPT-like) */
-  --sidebar-bg: #111827;
+  --sidebar-bg: #1c3365;
   --sidebar-panel: rgba(255, 255, 255, 0.06);
   --sidebar-border: rgba(255, 255, 255, 0.1);
   --sidebar-text: #f9fafb;
@@ -196,11 +196,12 @@ body {
   flex-direction: column;
   min-width: 0;
   overflow: hidden;
+  background: rgba(136, 136, 136, 0.5);
 }
 
 .chatTopBar {
   border-bottom: 1px solid var(--border);
-  background: rgba(247, 247, 248, 0.85);
+  background: #1c3365;
   backdrop-filter: blur(10px);
   padding: 14px 18px;
 }
@@ -208,6 +209,7 @@ body {
 .chatTitle {
   font-size: 14px;
   font-weight: 700;
+  color: white;
 }
 
 .chatSubtitle {
@@ -336,7 +338,7 @@ body {
 
 .composer {
   border-top: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(150, 150, 150, 0.1);
   backdrop-filter: blur(10px);
   padding: 14px 18px;
   position: sticky;
@@ -369,8 +371,8 @@ body {
 }
 
 .composerButton {
-  border: 1px solid rgba(16, 163, 127, 0.4);
-  background: rgba(16, 163, 127, 0.12);
+  border: 1px solid rgba(16, 163, 127, 1);
+  background: rgba(16, 163, 127, 0.4);
   color: var(--text);
   border-radius: 12px;
   padding: 12px 14px;
@@ -379,7 +381,7 @@ body {
 }
 
 .composerButton:disabled {
-  opacity: 0.5;
+  opacity: 1;
   cursor: not-allowed;
 }
 
