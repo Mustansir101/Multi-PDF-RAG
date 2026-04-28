@@ -8,7 +8,8 @@ import google.generativeai as genai
 from openai import OpenAI
 from google.genai import types
 
-QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
+# QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
+QDRANT_URL = os.getenv("QDRANT_URL", "https://qdrant-8wg1.onrender.com")
 QDRANT_COLLECTION = os.getenv("QDRANT_COLLECTION", "MultiPDFChat")
 
 # converts list of raw page dicts to list of LangChain Documents
