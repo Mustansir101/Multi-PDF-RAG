@@ -4,33 +4,19 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { API_BASE_URL } from "@/lib/config";
 import type { BackendAskResponse, ChatMessage } from "@/lib/types";
 
-type ChatProps = {
-  sessionId: string | null;
-  processedFiles: string[];
-};
-
-export function Chat({ sessionId, processedFiles }: ChatProps) {
+export function Chat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  const disabled = useMemo(() => !sessionId || busy, [sessionId, busy]);
-
-  useEffect(() => {
-    // Reset chat whenever a new session is created.
-    setMessages([]);
-    setInput("");
-    setError(null);
-  }, [sessionId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   async function send() {
-    if (!sessionId) return;
     const trimmed = input.trim();
     if (!trimmed) return;
 
@@ -51,7 +37,7 @@ export function Chat({ sessionId, processedFiles }: ChatProps) {
       const res = await fetch(`${API_BASE_URL}/ask-question`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ session_id: sessionId, user_query: trimmed }),
+        body: JSON.stringify({ user_query: trimmed }),
       });
 
       if (!res.ok) {
@@ -81,18 +67,11 @@ export function Chat({ sessionId, processedFiles }: ChatProps) {
   return (
     <div className="chatLayout">
       <div className="chatScroll" aria-label="chat messages">
-        {!sessionId ? (
-          <div className="emptyState">
-            <div className="emptyStateTitle">Upload & process PDFs</div>
-            <div className="emptyStateBody">
-              Use the sidebar to upload PDF files, then click Process.
-            </div>
-          </div>
-        ) : messages.length === 0 ? (
+        {messages.length === 0 ? (
           <div className="emptyState">
             <div className="emptyStateTitle">Ask a question</div>
             <div className="emptyStateBody">
-              Your PDFs are ready. Ask something to get started.
+              Ask something to get started.
             </div>
           </div>
         ) : (
@@ -150,9 +129,8 @@ export function Chat({ sessionId, processedFiles }: ChatProps) {
           <input
             className="composerInput"
             type="text"
-            placeholder={sessionId ? "Message" : "Process PDFs to start"}
+            placeholder="Ask a question..."
             value={input}
-            disabled={!sessionId}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") send();
@@ -160,18 +138,12 @@ export function Chat({ sessionId, processedFiles }: ChatProps) {
           />
           <button
             className="composerButton"
-            disabled={disabled || input.trim().length === 0}
+            disabled={input.trim().length === 0}
             onClick={send}
           >
             {busy ? "Sending" : "Send"}
           </button>
         </div>
-
-        {sessionId != null && processedFiles.length > 0 && (
-          <div className="composerHint">
-            Searching across {processedFiles.length} processed file(s).
-          </div>
-        )}
       </div>
     </div>
   );

@@ -2,18 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { Chat } from "@/components/Chat";
-import { PdfProcessor } from "@/components/PdfProcessor";
 
 export default function HomePage() {
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [processedFiles, setProcessedFiles] = useState<string[]>([]);
   const [processMessage, setProcessMessage] = useState<string | null>(null);
-
-  const statusText = useMemo(() => {
-    if (!sessionId) return "No PDFs processed yet.";
-    if (processedFiles.length === 0) return "Ready.";
-    return `Ready — ${processedFiles.length} file(s).`;
-  }, [sessionId, processedFiles]);
 
   return (
     <div className="appShell">
@@ -30,32 +21,10 @@ export default function HomePage() {
         <div className="sidebarSection">
           <div className="sidebarSectionTitle">PDFs</div>
           <div className="sidebarSectionBody">
-            <PdfProcessor
-              onProcessed={(result) => {
-                setSessionId(result.sessionId);
-                setProcessedFiles(result.files);
-                setProcessMessage(result.message ?? null);
-              }}
-            />
-
             <div className="sidebarMeta">
               <div className="sidebarMetaRow">
-                <span className="muted">Status</span>
-                <span className="sidebarMetaValue">{statusText}</span>
+                <span className="muted">This project transforms a simple Python script into a focused AI-driven question generation engine powered by Google’s Gemini API, where a carefully engineered system prompt ensures the model produces only high-quality, context-aware questions instead of generic responses. By combining strict prompt control with example-driven guidance, it consistently delivers precise and structured outputs, making it highly effective for use cases like interview preparation, study material creation, and idea generation, while also demonstrating practical mastery of prompt engineering and scalable AI integration.</span>
               </div>
-
-              {processedFiles.length > 0 && (
-                <div className="sidebarFiles">
-                  <div className="muted">Processed</div>
-                  <div className="sidebarFileList" aria-label="processed files">
-                    {processedFiles.map((f) => (
-                      <div className="sidebarFile" key={f} title={f}>
-                        {f}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {processMessage && (
                 <div className="sidebarHint" aria-label="process message">
@@ -71,13 +40,10 @@ export default function HomePage() {
         <header className="chatTopBar">
           <div>
             <div className="chatTitle">Chat</div>
-            <div className="chatSubtitle">
-              {sessionId ? `Session: ${sessionId}` : "Process PDFs to start"}
-            </div>
           </div>
         </header>
 
-        <Chat sessionId={sessionId} processedFiles={processedFiles} />
+        <Chat />
       </section>
     </div>
   );
